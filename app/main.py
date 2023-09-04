@@ -12,9 +12,15 @@ def match_alphanumeric(input_line):
     return any(char.isalnum() for char in input_line)
 
 
-def match_positive_character_groups(input_line, pattern):
-    chars_in_groups = "".join([group.split("]")[0] for group in pattern.split("[")])
-    return any(char in input_line for char in chars_in_groups)
+def match_character_groups(input_line, pattern):
+    groups = [grp.split("]")[0] for grp in pattern.split("[")]
+    positive_groups = "".join(grp for grp in groups if not grp.startswith("^"))
+    negative_groups = "".join(grp[1:] for grp in groups if grp.startswith("^"))
+    if positive_groups and not any(char in input_line for char in positive_groups):
+        return False
+    if negative_groups and any(char in input_line for char in negative_groups):
+        return False
+    return True
 
 
 def match_pattern(input_line, pattern):
@@ -25,7 +31,7 @@ def match_pattern(input_line, pattern):
     elif pattern == "\w":
         return match_alphanumeric(input_line)
     elif "[" in pattern and "]" in pattern:
-        return match_positive_character_groups(input_line, pattern)
+        return match_character_groups(input_line, pattern)
     else:
         raise RuntimeError(f"Unhandled pattern: {pattern}")
 
