@@ -27,7 +27,9 @@ def match_character_groups(input_char, pattern):
 
 def try_match(input_line, pattern):
     pattern_ind, pattern_end = 0, len(pattern)
-    for char in input_line:
+    line_ind, line_end = 0, len(input_line)
+    while line_ind < line_end:
+        char = input_line[line_ind]
         pattern_left = pattern[pattern_ind:]
         if pattern_left.startswith("\d"):
             if match_digit(char):
@@ -40,11 +42,26 @@ def try_match(input_line, pattern):
             if matched:
                 pattern_ind += length
         elif match_character(char, pattern_left[0]):
+            if pattern_ind < pattern_end - 1 and pattern[pattern_ind + 1] == "+":
+                pattern_ind += 1
+                line_ind += match_one_or_more_times(
+                    input_line[line_ind:], pattern_left[0]
+                )
             pattern_ind += 1
         else:
             return False
         if pattern_ind == pattern_end:
             return True
+        line_ind += 1
+
+
+def match_one_or_more_times(input_line, pattern):
+    times = 0
+    for char in input_line:
+        if char == pattern:
+            times += 1
+        else:
+            return times - 1
 
 
 def match_pattern(input_line, pattern):
@@ -53,31 +70,23 @@ def match_pattern(input_line, pattern):
         start_ind = 0
         pattern = pattern[1:]
     if pattern.endswith("$"):
-        start_ind = -calculate_pattern_length_in_chars(pattern[:-1])
-        end_ind = start_ind - 1
-        pattern = pattern[:-1]
+        pattern = reverse_pattern(pattern)
+        start_ind = 0
+        input_line = input_line[::-1]
     for ind in range(start_ind, end_ind, -1):
         if try_match(input_line[ind:], pattern):
             return True
     return False
 
 
-def calculate_pattern_length_in_chars(pattern):
-    length, ind = 0, 0
-    while ind < len(pattern):
-        pattern_left = pattern[ind:]
-        if pattern_left.startswith("\d"):
-            ind += 1
-        elif pattern_left.startswith("\w"):
-            ind += 1
-        elif pattern_left.startswith("["):
-            _, group_length = match_character_groups("a", pattern_left[1:])
-            ind += group_length - 1
-        elif pattern_left.startswith("^"):
-            length -= 1
-        length += 1
-        ind += 1
-    return length
+def reverse_pattern(pattern):
+    return (
+        pattern.replace("\\w", "w\\")
+        .replace("\\d", "d\\")
+        .replace("]", "*")
+        .replace("[", "]")
+        .replace("*", "[")[:-1][::-1]
+    )
 
 
 def main():
@@ -88,14 +97,12 @@ def main():
         print("Expected first argument to be '-E'")
         exit(1)
 
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!")
-
     # Uncomment this block to pass the first stage
     if match_pattern(input_line, pattern):
         print(f"matched {pattern} in {input_line}")
         exit(0)
     else:
+        print(f"no match")
         exit(1)
 
 
