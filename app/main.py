@@ -4,36 +4,54 @@ import sys
 # import lark - available if you need it!
 
 
-def match_digit(input_line):
-    return any(char.isdigit() for char in input_line)
+def match_character(char, pattern):
+    return char == pattern
 
 
-def match_alphanumeric(input_line):
-    return any(char.isalnum() for char in input_line)
+def match_digit(char):
+    return char.isdigit()
 
 
-def match_character_groups(input_line, pattern):
-    groups = [grp.split("]")[0] for grp in pattern.split("[")]
-    positive_groups = "".join(grp for grp in groups if not grp.startswith("^"))
-    negative_groups = "".join(grp[1:] for grp in groups if grp.startswith("^"))
-    if positive_groups and not any(char in input_line for char in positive_groups):
-        return False
-    if negative_groups and any(char in input_line for char in negative_groups):
-        return False
-    return True
+def match_alphanumeric(char):
+    return char.isalnum()
+
+
+def match_character_groups(input_char, pattern):
+    group = pattern.split("]")[0]
+    character_in_group = any(char == input_char for char in group.replace("^", ""))
+    matched_length = [character_in_group, len(group) + 2]
+    if group.startswith("^"):
+        matched_length[0] = not matched_length[0]
+    return matched_length
+
+
+def try_match(input_line, pattern):
+    pattern_ind, pattern_end = 0, len(pattern)
+    for char in input_line:
+        pattern_left = pattern[pattern_ind:]
+        if pattern_left.startswith("\d"):
+            if match_digit(char):
+                pattern_ind += 2
+        elif pattern_left.startswith("\w"):
+            if match_alphanumeric(char):
+                pattern_ind += 2
+        elif pattern_left.startswith("["):
+            matched, length = match_character_groups(char, pattern_left[1:])
+            if matched:
+                pattern_ind += length
+        elif match_character(char, pattern_left[0]):
+            pattern_ind += 1
+        else:
+            return False
+        if pattern_ind == pattern_end:
+            return True
 
 
 def match_pattern(input_line, pattern):
-    if len(pattern) == 1:
-        return pattern in input_line
-    elif pattern == "\d":
-        return match_digit(input_line)
-    elif pattern == "\w":
-        return match_alphanumeric(input_line)
-    elif "[" in pattern and "]" in pattern:
-        return match_character_groups(input_line, pattern)
-    else:
-        raise RuntimeError(f"Unhandled pattern: {pattern}")
+    for ind in range(len(input_line) - 1, -1, -1):
+        if try_match(input_line[ind:], pattern):
+            return True
+    return False
 
 
 def main():
