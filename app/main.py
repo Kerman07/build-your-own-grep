@@ -5,7 +5,7 @@ import sys
 
 
 def match_character(char, pattern):
-    return char == pattern
+    return True if pattern == "." else char == pattern
 
 
 def match_digit(char):

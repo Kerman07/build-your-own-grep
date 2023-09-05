@@ -14,6 +14,7 @@ test_cases=(
   "Pattern='\\w' Input='word' ExpectedExitCode=0"
   "Pattern='[abcd]' Input='a' ExpectedExitCode=0"
   "Pattern='[abcd]' Input='efgh' ExpectedExitCode=1"
+  "Pattern='[abc][opq]p' Input='apple' ExpectedExitCode=0"
   "Pattern='[^xyz]' Input='apple' ExpectedExitCode=0"
   "Pattern='[^anb]' Input='banana' ExpectedExitCode=1"
   "Pattern='\\d apple' Input='sally has 3 apples' ExpectedExitCode=0"
@@ -25,6 +26,8 @@ test_cases=(
   "Pattern='\\d \\w\\w\\ws' Input='sally has 1 dog' ExpectedExitCode=1"
   "Pattern='^log' Input='log' ExpectedExitCode=0"
   "Pattern='^log' Input='slog' ExpectedExitCode=1"
+  "Pattern='^[abc]og' Input='dogcat' ExpectedExitCode=1"
+  "Pattern='^[ojd]o\w' Input='dogcat' ExpectedExitCode=0"
   "Pattern='cat$' Input='cat' ExpectedExitCode=0"
   "Pattern='cat$' Input='cats' ExpectedExitCode=1"
   "Pattern='ca+t' Input='caaats' ExpectedExitCode=0"
@@ -34,6 +37,11 @@ test_cases=(
   "Pattern='ca?t' Input='act' ExpectedExitCode=0"
   "Pattern='ca?t' Input='dog' ExpectedExitCode=1"
   "Pattern='ca?t' Input='cag' ExpectedExitCode=1"
+  "Pattern='o[iug]ca?t+' Input='dogct' ExpectedExitCode=0"
+  "Pattern='c.t' Input='cat' ExpectedExitCode=0"
+  "Pattern='c.t' Input='cot' ExpectedExitCode=0"
+  "Pattern='c.t' Input='car' ExpectedExitCode=1"
+  "Pattern='o[dg].a?t+' Input='dogct' ExpectedExitCode=0"
 )
 
 # Initialize counters for passed and failed test cases
