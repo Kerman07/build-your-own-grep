@@ -28,31 +28,42 @@ def match_character_groups(input_char, pattern):
 def try_match(input_line, pattern):
     pattern_ind, pattern_end = 0, len(pattern)
     line_ind, line_end = 0, len(input_line)
-    while line_ind < line_end:
+
+    while line_ind < line_end and pattern_ind < pattern_end:
         char = input_line[line_ind]
         pattern_left = pattern[pattern_ind:]
-        if pattern_left.startswith("\d"):
-            if match_digit(char):
-                pattern_ind += 2
-        elif pattern_left.startswith("\w"):
-            if match_alphanumeric(char):
-                pattern_ind += 2
+
+        if pattern_left.startswith("\d") and match_digit(char):
+            pattern_ind += 2
+        elif pattern_left.startswith("\w") and match_alphanumeric(char):
+            pattern_ind += 2
         elif pattern_left.startswith("["):
             matched, length = match_character_groups(char, pattern_left[1:])
             if matched:
                 pattern_ind += length
+            else:
+                return False
+        elif pattern_ind < pattern_end - 1 and pattern[pattern_ind + 1] == "+":
+            pattern_ind += 2
+            matched = match_one_or_more_times(input_line[line_ind:], pattern_left[0])
+            if matched >= 0:
+                line_ind += matched
+            else:
+                return False
+        elif pattern_ind < pattern_end - 1 and pattern[pattern_ind + 1] == "?":
+            pattern_ind += 2
+            line_ind += match_zero_or_one_times(input_line[line_ind:], pattern_left[0])
         elif match_character(char, pattern_left[0]):
-            if pattern_ind < pattern_end - 1 and pattern[pattern_ind + 1] == "+":
-                pattern_ind += 1
-                line_ind += match_one_or_more_times(
-                    input_line[line_ind:], pattern_left[0]
-                )
             pattern_ind += 1
         else:
             return False
-        if pattern_ind == pattern_end:
-            return True
         line_ind += 1
+
+    return pattern_ind == pattern_end
+
+
+def match_zero_or_one_times(input_line, pattern):
+    return 0 if input_line[0] == pattern else -1
 
 
 def match_one_or_more_times(input_line, pattern):
@@ -61,7 +72,8 @@ def match_one_or_more_times(input_line, pattern):
         if char == pattern:
             times += 1
         else:
-            return times - 1
+            break
+    return times - 1
 
 
 def match_pattern(input_line, pattern):
