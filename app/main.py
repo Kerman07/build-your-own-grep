@@ -52,15 +52,37 @@ def match_pattern(input_line, pattern):
     if pattern.startswith("^"):
         start_ind = 0
         pattern = pattern[1:]
+    if pattern.endswith("$"):
+        start_ind = -calculate_pattern_length_in_chars(pattern[:-1])
+        end_ind = start_ind - 1
+        pattern = pattern[:-1]
     for ind in range(start_ind, end_ind, -1):
         if try_match(input_line[ind:], pattern):
             return True
     return False
 
 
+def calculate_pattern_length_in_chars(pattern):
+    length, ind = 0, 0
+    while ind < len(pattern):
+        pattern_left = pattern[ind:]
+        if pattern_left.startswith("\d"):
+            ind += 1
+        elif pattern_left.startswith("\w"):
+            ind += 1
+        elif pattern_left.startswith("["):
+            _, group_length = match_character_groups("a", pattern_left[1:])
+            ind += group_length - 1
+        elif pattern_left.startswith("^"):
+            length -= 1
+        length += 1
+        ind += 1
+    return length
+
+
 def main():
     pattern = sys.argv[2]
-    input_line = sys.stdin.read()
+    input_line = sys.stdin.read().replace("\n", "")
 
     if sys.argv[1] != "-E":
         print("Expected first argument to be '-E'")
