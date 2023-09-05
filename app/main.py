@@ -1,8 +1,5 @@
 import sys
 
-# import pyparsing - available if you need it!
-# import lark - available if you need it!
-
 
 def match_character(char, pattern):
     return True if pattern == "." else char == pattern
@@ -25,6 +22,27 @@ def match_character_groups(input_char, pattern):
     return matched_length
 
 
+def match_zero_or_one_times(input_line, pattern):
+    return 0 if input_line[0] == pattern else -1
+
+
+def match_one_or_more_times(input_line, pattern):
+    times = 0
+    for char in input_line:
+        if char == pattern:
+            times += 1
+        else:
+            break
+    return times - 1
+
+
+def match_alternation(input_line, pattern):
+    alternation = pattern.split(")")[0]
+    alternation_length = len(alternation) + 2
+    alternatives = alternation.split("|")
+    return [any(try_match(input_line, a) for a in alternatives), alternation_length]
+
+
 def try_match(input_line, pattern):
     pattern_ind, pattern_end = 0, len(pattern)
     line_ind, line_end = 0, len(input_line)
@@ -39,6 +57,12 @@ def try_match(input_line, pattern):
             pattern_ind += 2
         elif pattern_left.startswith("["):
             matched, length = match_character_groups(char, pattern_left[1:])
+            if matched:
+                pattern_ind += length
+            else:
+                return False
+        elif pattern_left.startswith("("):
+            matched, length = match_alternation(input_line[line_ind:], pattern_left[1:])
             if matched:
                 pattern_ind += length
             else:
@@ -60,20 +84,6 @@ def try_match(input_line, pattern):
         line_ind += 1
 
     return pattern_ind == pattern_end
-
-
-def match_zero_or_one_times(input_line, pattern):
-    return 0 if input_line[0] == pattern else -1
-
-
-def match_one_or_more_times(input_line, pattern):
-    times = 0
-    for char in input_line:
-        if char == pattern:
-            times += 1
-        else:
-            break
-    return times - 1
 
 
 def match_pattern(input_line, pattern):

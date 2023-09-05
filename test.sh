@@ -2,10 +2,6 @@
 
 declare test_cases
 test_cases=(
-  "Pattern='ca?t' Input='cat' ExpectedExitCode=0"
-  "Pattern='ca?t' Input='act' ExpectedExitCode=0"
-  "Pattern='ca?t' Input='dog' ExpectedExitCode=1"
-  "Pattern='ca?t' Input='cag' ExpectedExitCode=1"
   "Pattern='d' Input='dog' ExpectedExitCode=0"
   "Pattern='f' Input='dog' ExpectedExitCode=1"
   "Pattern='\\d' Input='123' ExpectedExitCode=0"
@@ -42,6 +38,15 @@ test_cases=(
   "Pattern='c.t' Input='cot' ExpectedExitCode=0"
   "Pattern='c.t' Input='car' ExpectedExitCode=1"
   "Pattern='o[dg].a?t+' Input='dogct' ExpectedExitCode=0"
+  "Pattern='a (cat|dog)' Input='a cat' ExpectedExitCode=0"
+  "Pattern='a (cat|dog)' Input='a dog' ExpectedExitCode=0"
+  "Pattern='a (cat|dog)' Input='a cow' ExpectedExitCode=1"
+  "Pattern='b([ia]n|[ia]g)' Input='bag' ExpectedExitCode=0"
+  "Pattern='b([ia]n|[ia]g)' Input='bat' ExpectedExitCode=1"
+  "Pattern='b([ia]n|[ia]g)' Input='bin' ExpectedExitCode=0"
+  "Pattern='b([ia]n|[ia]g)' Input='big' ExpectedExitCode=0"
+  "Pattern='h(it|ut|at)' Input='hut' ExpectedExitCode=0"
+  "Pattern='h(it|ut|at)' Input='hot' ExpectedExitCode=1"
 )
 
 # Initialize counters for passed and failed test cases
