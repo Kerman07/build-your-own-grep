@@ -48,7 +48,11 @@ def try_match(input_line, pattern):
 
 
 def match_pattern(input_line, pattern):
-    for ind in range(len(input_line) - 1, -1, -1):
+    start_ind, end_ind = len(input_line) - 1, -1
+    if pattern.startswith("^"):
+        start_ind = 0
+        pattern = pattern[1:]
+    for ind in range(start_ind, end_ind, -1):
         if try_match(input_line[ind:], pattern):
             return True
     return False
